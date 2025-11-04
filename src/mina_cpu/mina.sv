@@ -8,8 +8,10 @@
  */
 
 import types::u32_t;
+import types::regaddr_t;
 import types::wrstb_t;
-import types::if_params_t;
+import types::id_params_t;
+import types::ex_params_t;
 
 module mina(
     input logic clk,
@@ -46,23 +48,49 @@ module mina(
     end
 
     // --- Instruction fetch ---
-    if_params_t if_params_if;
-    if_params_t if_params_id;
+    id_params_t id_params_if;
+    id_params_t id_params_id;
 
     assign imem_addr = ia;
 
-    assign if_params_if.ia_plus_4 = ia_plus_4;
-    assign if_params_if.ir        = imem_data;
+    assign id_params_if.ia_plus_4 = ia_plus_4;
+    assign id_params_if.ir        = imem_data;
 
     // --- IF/ID ---
     if_id if_id0(
         .clk(clk),
         .rst_n(rst_n),
-        .if_params_in(if_params_if),
-        .if_params_out(if_params_id)
+        .id_params_in(id_params_if),
+        .id_params_out(id_params_id)
     );
 
     // --- Instruction decode ---
+    ex_params_t ex_params_id;
+    ex_params_t ex_params_ex;
+
+    regaddr_t rd_addr;
+    u32_t     rd_data;
+
+    // TODO
+    assign rd_addr = '0;
+    assign rd_data = '0;
+
+    id_stage id_stage0(
+        .clk(clk),
+        .rst_n(rst_n),
+        .rd_addr(rd_addr),
+        .rd_data(rd_data),
+        .id_params(id_params_id),
+        .ex_params(ex_params_id)
+    );
+
+    // --- ID/EX ---
+    id_ex id_ex0(
+        .clk(clk),
+        .rst_n(rst_n),
+        .ex_params_in(ex_params_id),
+        .ex_params_out(ex_params_ex)
+    );
 
     // --- Memory access ---
     // TODO
