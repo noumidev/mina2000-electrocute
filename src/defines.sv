@@ -20,6 +20,12 @@ package types;
         SEL_REG    = 2'b10
     } sel_t;
 
+    typedef enum logic[1:0] {
+        FW_SEL_ID_EX  = 2'b00,
+        FW_SEL_EX_MEM = 2'b01,
+        FW_SEL_MEM_WB = 2'b10
+    } fw_sel_t;
+
     // Pipeline
     typedef struct packed {
         u32_t ia_plus_4;
