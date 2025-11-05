@@ -14,6 +14,7 @@ import types::fw_sel_t;
 import types::id_params_t;
 import types::ex_params_t;
 import types::mem_params_t;
+import types::wb_params_t;
 
 module mina(
     input logic clk,
@@ -27,7 +28,9 @@ module mina(
 
     // IMEM interface
     output u32_t imem_addr,
-    input  u32_t imem_data
+    input  u32_t imem_data,
+
+    output u32_t wb_out
 );
 
     localparam INITIAL_IA = 32'b0;
@@ -70,18 +73,14 @@ module mina(
     ex_params_t ex_params_id;
     ex_params_t ex_params_ex;
 
-    regaddr_t rd_addr;
-    u32_t     rd_data;
-
-    // TODO
-    assign rd_addr = '0;
-    assign rd_data = '0;
+    regaddr_t rd_addr_wb;
+    u32_t     rd_data_wb;
 
     id_stage id_stage0(
         .clk(clk),
         .rst_n(rst_n),
-        .rd_addr(rd_addr),
-        .rd_data(rd_data),
+        .rd_addr(rd_addr_wb),
+        .rd_data(rd_data_wb),
         .id_params(id_params_id),
         .ex_params(ex_params_id)
     );
@@ -137,14 +136,34 @@ module mina(
     assign rd_addr_ex_mem = mem_params_mem.rd_addr;
     assign rd_data_ex_mem = mem_params_mem.rd_data;
 
-    // TODO
-    assign rd_addr_mem_wb = '0;
-    assign rd_data_mem_wb = '0;
-
     // --- Memory access ---
-    // TODO
-    assign dmem_addr   = '0;
-    assign dmem_wrdata = '0;
-    assign dmem_wrstb  = '0;
+    wb_params_t wb_params_mem;
+    wb_params_t wb_params_wb;
+
+    mem_stage mem_stage0(
+        .mem_params(mem_params_mem),
+        .dmem_addr(dmem_addr),
+        .dmem_wrdata(dmem_wrdata),
+        .dmem_wrstb(dmem_wrstb),
+        .dmem_rddata(dmem_rddata),
+        .wb_params(wb_params_mem)
+    );
+
+    // --- MEM/WB ---
+    mem_wb mem_wb0(
+        .clk(clk),
+        .rst_n(rst_n),
+        .wb_params_in(wb_params_mem),
+        .wb_params_out(wb_params_wb)
+    );
+
+    assign rd_addr_mem_wb = wb_params_wb.rd_addr;
+    assign rd_data_mem_wb = wb_params_wb.rd_data;
+
+    // --- Write-back ---
+    assign rd_addr_wb = wb_params_wb.rd_addr;
+    assign rd_data_wb = wb_params_wb.rd_data;
+
+    assign wb_out = wb_params_wb.rd_data;
 
 endmodule
