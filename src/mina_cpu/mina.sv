@@ -13,6 +13,7 @@ import types::wrstb_t;
 import types::fw_sel_t;
 import types::id_params_t;
 import types::ex_params_t;
+import types::mem_params_t;
 
 module mina(
     input logic clk,
@@ -109,9 +110,36 @@ module mina(
         .rb_sel(rb_sel)
     );
 
+    // --- Execute stage ---
+    mem_params_t mem_params_ex;
+    mem_params_t mem_params_mem;
+
+    u32_t rd_data_ex_mem;
+    u32_t rd_data_mem_wb;
+
+    ex_stage ex_stage0(
+        .ex_params(ex_params_ex),
+        .ra_sel(ra_sel),
+        .rb_sel(rb_sel),
+        .rd_data_ex_mem(rd_data_ex_mem),
+        .rd_data_mem_wb(rd_data_mem_wb),
+        .mem_params(mem_params_ex)
+    );
+
+    // --- EX/MEM ---
+    ex_mem ex_mem0(
+        .clk(clk),
+        .rst_n(rst_n),
+        .mem_params_in(mem_params_ex),
+        .mem_params_out(mem_params_mem)
+    );
+
+    assign rd_addr_ex_mem = mem_params_mem.rd_addr;
+    assign rd_data_ex_mem = mem_params_mem.rd_data;
+
     // TODO
-    assign rd_addr_ex_mem = '0;
     assign rd_addr_mem_wb = '0;
+    assign rd_data_mem_wb = '0;
 
     // --- Memory access ---
     // TODO
