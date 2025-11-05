@@ -15,6 +15,9 @@ import types::SEL_IA_IMM;
 import types::SEL_REG;
 import types::ALU_OP_ADD;
 import types::ALU_OP_SUB;
+import types::ALU_OP_AND;
+import types::ALU_OP_OR;
+import types::ALU_OP_XOR;
 import types::id_params_t;
 import types::ex_params_t;
 
@@ -39,6 +42,7 @@ module id_stage(
 
     enum logic[6:0] {
         OPC_ARITH = 7'bx000000,
+        OPC_LOGIC = 7'bx000001,
         OPC_MOVH  = 7'b1111100,
         OPC_ADR   = 7'b1111101
     } opcode_e;
@@ -47,6 +51,12 @@ module id_stage(
         ARITH_ADD = 10'b000,
         ARITH_SUB = 10'b100
     } arith_e;
+
+    enum logic[9:0] {
+        LOGIC_AND  = 10'b00x,
+        LOGIC_OR   = 10'b01x,
+        LOGIC_XOR  = 10'b10x
+    } logic_e;
 
     regfile regfile0(
         .clk(clk),
@@ -112,7 +122,8 @@ module id_stage(
             end
         endcase
 
-        ex_params.alu_op = ALU_OP_ADD;
+        ex_params.alu_op   = ALU_OP_ADD;
+        ex_params.invert_b = '0;
 
         // Decode operation
         unique0 case(opcode) inside
@@ -120,6 +131,15 @@ module id_stage(
                 unique0 case(secopc) inside
                     ARITH_SUB: ex_params.alu_op = ALU_OP_SUB;
                 endcase
+            end
+            OPC_LOGIC: begin
+                unique0 case(secopc) inside
+                    LOGIC_AND: ex_params.alu_op = ALU_OP_AND;
+                    LOGIC_OR:  ex_params.alu_op = ALU_OP_OR;
+                    LOGIC_XOR: ex_params.alu_op = ALU_OP_XOR;
+                endcase
+
+                ex_params.invert_b = opcode[0];
             end
         endcase
     end

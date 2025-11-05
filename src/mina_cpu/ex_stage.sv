@@ -15,6 +15,9 @@ import types::FW_SEL_EX_MEM;
 import types::FW_SEL_MEM_WB;
 import types::ALU_OP_ADD;
 import types::ALU_OP_SUB;
+import types::ALU_OP_AND;
+import types::ALU_OP_OR;
+import types::ALU_OP_XOR;
 import types::MEM_OP_NONE;
 import types::ex_params_t;
 import types::mem_params_t;
@@ -45,6 +48,8 @@ module ex_stage(
     always_comb begin
         op_a = '0;
         op_b = '0;
+
+        result = '0;
     
         // Select operand A
         if (ex_params.a_sel == SEL_IA_IMM)
@@ -70,10 +75,15 @@ module ex_stage(
                 op_b = rd_data_ex_mem;
         end
 
-        unique case(ex_params.alu_op) inside
+        if (ex_params.invert_b)
+            op_b = ~op_b;
+
+        unique0 case(ex_params.alu_op) inside
             ALU_OP_ADD: result = op_a + op_b;
             ALU_OP_SUB: result = op_a - op_b;
-            default:    result = '0;
+            ALU_OP_AND: result = op_a & op_b;
+            ALU_OP_OR:  result = op_a | op_b;
+            ALU_OP_XOR: result = op_a ^ op_b;
         endcase
 
         mem_params.rd_addr = ex_params.rd_addr;
