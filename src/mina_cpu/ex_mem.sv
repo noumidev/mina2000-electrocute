@@ -7,8 +7,6 @@
  * mina_cpu/ex_mem.sv - Intermediary EX/MEM register
  */
 
-import types::u32_t;
-import types::regaddr_t;
 import types::MEM_OP_NONE;
 
 module ex_mem(
