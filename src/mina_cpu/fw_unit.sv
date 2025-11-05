@@ -9,7 +9,7 @@
 
 import types::u32_t;
 import types::regaddr_t;
-import types::fw_sel_t;
+import types::fw_sel_e;
 import types::FW_SEL_ID_EX;
 import types::FW_SEL_EX_MEM;
 import types::FW_SEL_MEM_WB;
@@ -26,8 +26,8 @@ module fw_unit(
     input regaddr_t rd_addr_mem_wb,
 
     // To EX
-    output fw_sel_t ra_sel,
-    output fw_sel_t rb_sel
+    output fw_sel_e ra_sel,
+    output fw_sel_e rb_sel
 );
 
     always_comb begin

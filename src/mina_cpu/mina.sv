@@ -10,7 +10,7 @@
 import types::u32_t;
 import types::regaddr_t;
 import types::wrstb_t;
-import types::fw_sel_t;
+import types::fw_sel_e;
 import types::id_params_t;
 import types::ex_params_t;
 import types::mem_params_t;
@@ -97,8 +97,8 @@ module mina(
     regaddr_t rd_addr_ex_mem;
     regaddr_t rd_addr_mem_wb;
 
-    fw_sel_t ra_sel;
-    fw_sel_t rb_sel;
+    fw_sel_e ra_sel;
+    fw_sel_e rb_sel;
 
     fw_unit fw_unit0(
         .ra_addr_id_ex(ex_params_ex.ra_addr),
