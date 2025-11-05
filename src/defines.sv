@@ -26,6 +26,13 @@ package types;
         FW_SEL_MEM_WB = 2'b10
     } fw_sel_t;
 
+    // Memory operations
+    typedef enum logic[1:0] {
+        MEM_OP_NONE  = 2'b00,
+        MEM_OP_LOAD  = 2'b01,
+        MEM_OP_STORE = 2'b10
+    } mem_op_t;
+
     // Pipeline
     typedef struct packed {
         u32_t ia_plus_4;
@@ -48,5 +55,13 @@ package types;
         u32_t   imm;
         shift_t shift;
     } ex_params_t;
+
+    typedef struct packed {
+        regaddr_t rd_addr;
+        u32_t     rd_data;
+
+        mem_op_t mem_op;
+        u32_t    mem_data;
+    } mem_params_t;
 
 endpackage
