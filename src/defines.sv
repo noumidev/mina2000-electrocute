@@ -64,4 +64,9 @@ package types;
         u32_t    mem_data;
     } mem_params_t;
 
+    typedef struct packed {
+        regaddr_t rd_addr;
+        u32_t     rd_data;
+    } wb_params_t;
+
 endpackage
