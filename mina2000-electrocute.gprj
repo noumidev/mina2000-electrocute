@@ -8,6 +8,8 @@
         <File path="src/defines.sv" type="file.verilog" enable="1"/>
         <File path="src/dmem.sv" type="file.verilog" enable="1"/>
         <File path="src/imem.sv" type="file.verilog" enable="1"/>
+        <File path="src/mina_cpu/ex_mem.sv" type="file.verilog" enable="1"/>
+        <File path="src/mina_cpu/ex_stage.sv" type="file.verilog" enable="1"/>
         <File path="src/mina_cpu/fw_unit.sv" type="file.verilog" enable="1"/>
         <File path="src/mina_cpu/id_ex.sv" type="file.verilog" enable="1"/>
         <File path="src/mina_cpu/id_stage.sv" type="file.verilog" enable="1"/>
