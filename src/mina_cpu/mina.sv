@@ -10,6 +10,7 @@
 import types::u32_t;
 import types::regaddr_t;
 import types::wrstb_t;
+import types::fw_sel_t;
 import types::id_params_t;
 import types::ex_params_t;
 
@@ -91,6 +92,26 @@ module mina(
         .ex_params_in(ex_params_id),
         .ex_params_out(ex_params_ex)
     );
+
+    // --- Forwarding unit ---
+    regaddr_t rd_addr_ex_mem;
+    regaddr_t rd_addr_mem_wb;
+
+    fw_sel_t ra_sel;
+    fw_sel_t rb_sel;
+
+    fw_unit fw_unit0(
+        .ra_addr_id_ex(ex_params_ex.ra_addr),
+        .rb_addr_id_ex(ex_params_ex.rb_addr),
+        .rd_addr_ex_mem(rd_addr_ex_mem),
+        .rd_addr_mem_wb(rd_addr_mem_wb),
+        .ra_sel(ra_sel),
+        .rb_sel(rb_sel)
+    );
+
+    // TODO
+    assign rd_addr_ex_mem = '0;
+    assign rd_addr_mem_wb = '0;
 
     // --- Memory access ---
     // TODO
