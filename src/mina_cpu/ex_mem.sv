@@ -8,6 +8,7 @@
  */
 
 import types::MEM_OP_NONE;
+import types::mem_params_t;
 
 module ex_mem(
     input logic clk,
