@@ -10,10 +10,19 @@
 import types::u32_t;
 import types::wrstb_t;
 
+typedef logic[3:0] led_t;
+
 module top(
     input logic clk,
-    input logic rst_n
+    input logic rst_n,
+    
+    output led_t leds
 );
+
+    localparam CLOCK_FREQUENCY = 27_000_000;
+
+    // Debug
+    u32_t wb_out;
 
     // DMEM signals
     u32_t   dmem_addr;
@@ -48,7 +57,23 @@ module top(
         .dmem_wrstb(dmem_wrstb),
         .dmem_rddata(dmem_rddata),
         .imem_addr(imem_addr),
-        .imem_data(imem_data)
+        .imem_data(imem_data),
+        .wb_out(wb_out)
     );
+
+    // Debug
+    u32_t counter;
+
+    always_ff @(posedge clk) begin
+        if (!rst_n)
+            counter <= CLOCK_FREQUENCY / 2;
+        else begin
+            if (counter == 0) begin
+                leds    <= ~wb_out[3:0];
+                counter <= CLOCK_FREQUENCY / 2;
+            end else
+                counter <= counter - 32'b1;
+        end
+    end
 
 endmodule
