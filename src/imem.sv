@@ -21,7 +21,11 @@ module imem(
 
     u32_t mem[0:SIZE - 1];
 
-    initial mem = '{SIZE{32'b0}};
+    initial begin
+        mem = '{SIZE{32'b0}};
+
+        $readmemh("imem.init", mem);
+    end
 
     // Reads
     always_comb begin
