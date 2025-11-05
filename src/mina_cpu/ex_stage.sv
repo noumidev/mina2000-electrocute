@@ -10,9 +10,11 @@
 import types::u32_t;
 import types::SEL_IA_IMM;
 import types::SEL_REG;
-import types::fw_sel_t;
+import types::fw_sel_e;
 import types::FW_SEL_EX_MEM;
 import types::FW_SEL_MEM_WB;
+import types::ALU_OP_ADD;
+import types::ALU_OP_SUB;
 import types::MEM_OP_NONE;
 import types::ex_params_t;
 import types::mem_params_t;
@@ -22,8 +24,8 @@ module ex_stage(
     input ex_params_t ex_params,
 
     // From FW unit
-    input fw_sel_t ra_sel,
-    input fw_sel_t rb_sel,
+    input fw_sel_e ra_sel,
+    input fw_sel_e rb_sel,
 
     // From EX/MEM
     input u32_t rd_data_ex_mem,
@@ -37,6 +39,8 @@ module ex_stage(
 
     u32_t op_a;
     u32_t op_b;
+
+    u32_t result;
 
     always_comb begin
         op_a = '0;
@@ -66,10 +70,14 @@ module ex_stage(
                 op_b = rd_data_ex_mem;
         end
 
-        // TODO: perform ALU operation
+        unique case(ex_params.alu_op) inside
+            ALU_OP_ADD: result = op_a + op_b;
+            ALU_OP_SUB: result = op_a - op_b;
+            default:    result = '0;
+        endcase
 
         mem_params.rd_addr = ex_params.rd_addr;
-        mem_params.rd_data = '0;
+        mem_params.rd_data = result;
 
         mem_params.mem_op   = MEM_OP_NONE;
         mem_params.mem_data = '0;

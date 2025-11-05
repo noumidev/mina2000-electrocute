@@ -9,10 +9,12 @@
 
 import types::u32_t;
 import types::regaddr_t;
-import types::sel_t;
+import types::sel_e;
 import types::SEL_ZERO;
 import types::SEL_IA_IMM;
 import types::SEL_REG;
+import types::ALU_OP_ADD;
+import types::ALU_OP_SUB;
 import types::id_params_t;
 import types::ex_params_t;
 
@@ -34,6 +36,17 @@ module id_stage(
 
     typedef logic[6:0] opcode_t;
     typedef logic[9:0] secopc_t;
+
+    enum logic[6:0] {
+        OPC_ARITH = 7'bx000000,
+        OPC_MOVH  = 7'b1111100,
+        OPC_ADR   = 7'b1111101
+    } opcode_e;
+
+    enum logic[9:0] {
+        ARITH_ADD = 10'b000,
+        ARITH_SUB = 10'b100
+    } arith_e;
 
     regfile regfile0(
         .clk(clk),
@@ -96,6 +109,17 @@ module id_stage(
                 ex_params.imm = {20'b0, id_params.ir[31:20]};
 
                 // TODO: shifts for loadstores
+            end
+        endcase
+
+        ex_params.alu_op = ALU_OP_ADD;
+
+        // Decode operation
+        unique0 case(opcode) inside
+            OPC_ARITH: begin
+                unique0 case(secopc) inside
+                    ARITH_SUB: ex_params.alu_op = ALU_OP_SUB;
+                endcase
             end
         endcase
     end
