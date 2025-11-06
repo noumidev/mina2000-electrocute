@@ -127,7 +127,7 @@ module ex_stage(
         branch_ia  = '0;
 
         mem_params.rd_addr  = ex_params.rd_addr;
-        mem_params.mem_op   = MEM_OP_NONE;
+        mem_params.mem_op   = ex_params.mem_op;
         mem_params.mem_data = '0;
 
         if (ex_params.branch) begin

@@ -23,6 +23,9 @@ import types::ALU_OP_CEQ;
 import types::ALU_OP_CHS;
 import types::ALU_OP_CGE;
 import types::t_op_e;
+import types::MEM_OP_NONE;
+import types::MEM_OP_LOAD;
+import types::MEM_OP_STORE;
 import types::id_params_t;
 import types::ex_params_t;
 
@@ -50,6 +53,8 @@ module id_stage(
         OPC_LOGIC = 7'bx000001,
         OPC_CMP   = 7'bx0001xx,
         OPC_MEM   = 7'b100100x,
+        OPC_LOAD  = 7'b1001000,
+        OPC_STORE = 7'b1001001,
         OPC_MOVH  = 7'b1111100,
         OPC_ADR   = 7'b1111101,
         OPC_BRA   = 7'b1111111
@@ -107,6 +112,13 @@ module id_stage(
         
         ex_params.branch      = '0;
         ex_params.cond_branch = '0;
+
+        ex_params.mem_op = MEM_OP_NONE;
+
+        if (opcode == OPC_LOAD)
+            ex_params.mem_op = MEM_OP_LOAD;
+        else if (opcode == OPC_STORE)
+            ex_params.mem_op = MEM_OP_STORE;
 
         // Decode operands
         unique case(opcode) inside
