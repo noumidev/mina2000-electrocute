@@ -20,16 +20,18 @@ module if_id(
     output id_params_t id_params_out,
 
     // From EX
-    input logic valid
+    input logic valid,
+
+    // From hazard unit
+    input logic stall
 );
 
     always_ff @(posedge clk) begin
         if (!rst_n || !valid) begin
             id_params_out.ia_plus_4 <= '0;
             id_params_out.ir        <= '0;
-        end else begin
+        end else if (!stall)
             id_params_out <= id_params_in;
-        end
     end
 
 endmodule
