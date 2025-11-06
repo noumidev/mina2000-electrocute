@@ -39,13 +39,7 @@ module id_stage(
     input u32_t     rd_data,
 
     // To ID/EX
-    output ex_params_t ex_params,
-
-    // To IF/ID
-    output logic branch_req,
-
-    // To IA
-    output u32_t branch_ia
+    output ex_params_t ex_params
 );
 
     typedef logic[6:0] opcode_t;
@@ -58,8 +52,7 @@ module id_stage(
         OPC_MEM   = 7'b100100x,
         OPC_MOVH  = 7'b1111100,
         OPC_ADR   = 7'b1111101,
-        OPC_BRA   = 7'b1111110,
-        OPC_CALL  = 7'b1111111
+        OPC_BRA   = 7'b1111111
     } opcode_e;
 
     enum logic[9:0] {
@@ -111,9 +104,9 @@ module id_stage(
 
         ex_params.imm   = {20'b0, id_params.ir[31:20]};
         ex_params.shift = opcode[6:1] == OPC_MEM[6:1] ? shift_t'(secopc[2:1]) : '0;
-
-        branch_req = '0;
-        branch_ia  = '0;
+        
+        ex_params.branch      = '0;
+        ex_params.cond_branch = '0;
 
         // Decode operands
         unique case(opcode) inside
@@ -130,17 +123,15 @@ module id_stage(
 
                 ex_params.imm = {id_params.ir[31:12], 12'b0};
             end
-            OPC_BRA, OPC_CALL: begin
+            OPC_BRA: begin
                 // D-type
                 ex_params.a_sel = SEL_IA_IMM;
-                ex_params.b_sel = SEL_ZERO;
+                ex_params.b_sel = SEL_IA_IMM;
 
-                // opcode[0] -> BRA, opcode[1] -> CALL
-                ex_params.rd_addr = opcode[0] ? 5'd31 : '0;
+                // secopc[2] = 0 -> BRA, secopc[2] = 1 -> CALL
+                ex_params.rd_addr = secopc[2] ? 5'd31 : '0;
 
-                // Special case: branch logic is handled in ID
-                branch_req = '1;
-                branch_ia  = id_params.ia_plus_4 + {{5{id_params.ir[31]}}, id_params.ir[31:7], 2'b00};
+                ex_params.imm = {{5{id_params.ir[31]}}, id_params.ir[31:7], 2'b0};
             end
             default: begin
                 // I-type
@@ -183,6 +174,11 @@ module id_stage(
 
                 ex_params.t_op     = t_op_e'(opcode[1:0]);
                 ex_params.invert_t = secopc[0];
+            end
+            OPC_BRA: begin
+                ex_params.branch      = '1;
+                ex_params.cond_branch = secopc[1];
+                ex_params.invert_t    = secopc[0];
             end
         endcase
     end

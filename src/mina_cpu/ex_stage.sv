@@ -46,7 +46,13 @@ module ex_stage(
 
     // To EX/MEM
     output mem_params_t mem_params,
-    output logic        t_out
+    output logic        t_out,
+
+    // To IF/ID
+    output logic branch_req,
+
+    // To IA
+    output u32_t branch_ia
 );
 
     u32_t op_a;
@@ -117,11 +123,21 @@ module ex_stage(
             end
         endcase
 
-        mem_params.rd_addr = ex_params.rd_addr;
-        mem_params.rd_data = result;
+        branch_req = '0;
+        branch_ia  = '0;
 
+        mem_params.rd_addr  = ex_params.rd_addr;
         mem_params.mem_op   = MEM_OP_NONE;
         mem_params.mem_data = '0;
+
+        if (ex_params.branch) begin
+            branch_req = !ex_params.cond_branch || (t_in ^ ex_params.invert_t);
+            branch_ia  = result;
+
+            mem_params.rd_data = ex_params.ia_plus_4;
+        end else begin
+            mem_params.rd_data = result;
+        end
     end
 
 endmodule

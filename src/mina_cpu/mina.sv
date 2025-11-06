@@ -76,9 +76,6 @@ module mina(
         .valid(if_id_valid)
     );
 
-    // Fetched instruction is valid when a branch is not requested
-    assign if_id_valid = !branch_req;
-
     // --- Instruction decode ---
     ex_params_t ex_params_id;
     ex_params_t ex_params_ex;
@@ -92,18 +89,23 @@ module mina(
         .rd_addr(rd_addr_wb),
         .rd_data(rd_data_wb),
         .id_params(id_params_id),
-        .ex_params(ex_params_id),
-        .branch_req(branch_req),
-        .branch_ia(branch_ia)
+        .ex_params(ex_params_id)
     );
 
     // --- ID/EX ---
+    logic id_ex_valid;
+
     id_ex id_ex0(
         .clk(clk),
         .rst_n(rst_n),
         .ex_params_in(ex_params_id),
-        .ex_params_out(ex_params_ex)
+        .ex_params_out(ex_params_ex),
+        .valid(id_ex_valid)
     );
+
+    // Flush IF and ID upon branches
+    assign if_id_valid = !branch_req;
+    assign id_ex_valid = !branch_req;
 
     // --- Forwarding unit ---
     regaddr_t rd_addr_ex_mem;
@@ -139,7 +141,9 @@ module mina(
         .t_in(t_ex_mem),
         .rd_data_mem_wb(rd_data_mem_wb),
         .mem_params(mem_params_ex),
-        .t_out(t_ex)
+        .t_out(t_ex),
+        .branch_req(branch_req),
+        .branch_ia(branch_ia)
     );
 
     // --- EX/MEM ---
