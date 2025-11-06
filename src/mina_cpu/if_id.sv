@@ -17,11 +17,14 @@ module if_id(
     input id_params_t id_params_in,
 
     // To ID
-    output id_params_t id_params_out
+    output id_params_t id_params_out,
+
+    // From ID
+    input logic valid
 );
 
     always_ff @(posedge clk) begin
-        if (!rst_n) begin
+        if (!rst_n || !valid) begin
             id_params_out.ia_plus_4 <= '0;
             id_params_out.ir        <= '0;
         end else begin

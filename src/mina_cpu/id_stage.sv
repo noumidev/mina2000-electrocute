@@ -34,7 +34,13 @@ module id_stage(
     input u32_t     rd_data,
 
     // To ID/EX
-    output ex_params_t ex_params
+    output ex_params_t ex_params,
+
+    // To IF/ID
+    output logic branch_req,
+
+    // To IA
+    output u32_t branch_ia
 );
 
     typedef logic[6:0] opcode_t;
@@ -44,7 +50,9 @@ module id_stage(
         OPC_ARITH = 7'bx000000,
         OPC_LOGIC = 7'bx000001,
         OPC_MOVH  = 7'b1111100,
-        OPC_ADR   = 7'b1111101
+        OPC_ADR   = 7'b1111101,
+        OPC_BRA   = 7'b1111110,
+        OPC_CALL  = 7'b1111111
     } opcode_e;
 
     enum logic[9:0] {
@@ -85,6 +93,9 @@ module id_stage(
         ex_params.imm   = '0;
         ex_params.shift = '0;
 
+        branch_req = '0;
+        branch_ia  = '0;
+
         // Decode operands
         unique case(opcode) inside
             7'b0xxxxxx: begin
@@ -100,7 +111,7 @@ module id_stage(
 
                 ex_params.imm = {id_params.ir[31:12], 12'b0};
             end
-            7'b111111x: begin
+            OPC_BRA, OPC_CALL: begin
                 // D-type
                 ex_params.a_sel = SEL_IA_IMM;
                 ex_params.b_sel = SEL_ZERO;
@@ -109,6 +120,8 @@ module id_stage(
                 ex_params.rd_addr = opcode[0] ? 5'd31 : '0;
 
                 // Special case: branch logic is handled in ID
+                branch_req = '1;
+                branch_ia  = id_params.ia_plus_4 + {{5{id_params.ir[31]}}, id_params.ir[31:7], 2'b00};
             end
             default: begin
                 // I-type

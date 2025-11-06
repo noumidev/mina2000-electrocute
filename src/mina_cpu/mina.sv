@@ -38,14 +38,18 @@ module mina(
     // --- Instruction address register ---
     u32_t ia;
     u32_t ia_plus_4;
-
-    // TODO: handle branch logic
+    logic branch_req;
+    u32_t branch_ia;
 
     always_ff @(posedge clk) begin
         if (!rst_n)
             ia <= INITIAL_IA;
-        else
-            ia <= ia_plus_4;
+        else begin
+            if (branch_req)
+                ia <= branch_ia;
+            else
+                ia <= ia_plus_4;
+        end
     end
 
     always_comb begin
@@ -62,12 +66,18 @@ module mina(
     assign id_params_if.ir        = imem_data;
 
     // --- IF/ID ---
+    logic if_id_valid;
+
     if_id if_id0(
         .clk(clk),
         .rst_n(rst_n),
         .id_params_in(id_params_if),
-        .id_params_out(id_params_id)
+        .id_params_out(id_params_id),
+        .valid(if_id_valid)
     );
+
+    // Fetched instruction is valid when a branch is not requested
+    assign if_id_valid = !branch_req;
 
     // --- Instruction decode ---
     ex_params_t ex_params_id;
@@ -82,7 +92,9 @@ module mina(
         .rd_addr(rd_addr_wb),
         .rd_data(rd_data_wb),
         .id_params(id_params_id),
-        .ex_params(ex_params_id)
+        .ex_params(ex_params_id),
+        .branch_req(branch_req),
+        .branch_ia(branch_ia)
     );
 
     // --- ID/EX ---
