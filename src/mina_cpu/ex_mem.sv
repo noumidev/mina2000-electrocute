@@ -16,9 +16,13 @@ module ex_mem(
 
     // From EX
     input mem_params_t mem_params_in,
+    input logic        t_in,
 
     // To MEM
-    output mem_params_t mem_params_out
+    output mem_params_t mem_params_out,
+
+    // To EX
+    output logic t_out
 );
 
     always_ff @(posedge clk) begin
@@ -28,8 +32,12 @@ module ex_mem(
 
             mem_params_out.mem_op   <= MEM_OP_NONE;
             mem_params_out.mem_data <= '0;
+
+            t_out <= 0;
         end else begin
             mem_params_out <= mem_params_in;
+
+            t_out <= t_in;
         end
     end
 
