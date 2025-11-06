@@ -81,6 +81,8 @@ package types;
 
         logic branch;
         logic cond_branch;
+
+        mem_op_e mem_op;
     } ex_params_t;
 
     typedef struct packed {

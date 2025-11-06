@@ -10,6 +10,7 @@
 import types::SEL_ZERO;
 import types::ALU_OP_ADD;
 import types::T_OP_SET;
+import types::MEM_OP_NONE;
 import types::ex_params_t;
 
 module id_ex(
@@ -44,6 +45,7 @@ module id_ex(
             ex_params_out.invert_t    <= '0;
             ex_params_out.branch      <= '0;
             ex_params_out.cond_branch <= '0;
+            ex_params_out.mem_op      <= MEM_OP_NONE;
         end else begin
             ex_params_out <= ex_params_in;
         end
