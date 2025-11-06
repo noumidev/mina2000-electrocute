@@ -26,6 +26,7 @@ import types::T_OP_OR;
 import types::T_OP_XOR;
 import types::T_OP_SET;
 import types::MEM_OP_NONE;
+import types::MEM_OP_STORE;
 import types::ex_params_t;
 import types::mem_params_t;
 
@@ -57,6 +58,7 @@ module ex_stage(
 
     u32_t op_a;
     u32_t op_b;
+    u32_t rb_data;
 
     u32_t result;
 
@@ -82,16 +84,18 @@ module ex_stage(
                 op_a = rd_data_ex_mem;
         end
 
+        rb_data = ex_params.rb_data;
+
+        if (rb_sel == FW_SEL_MEM_WB)
+            rb_data = rd_data_mem_wb;
+        else if (rb_sel == FW_SEL_EX_MEM)
+            rb_data = rd_data_ex_mem;
+
         // Select operand B
         if (ex_params.b_sel == SEL_IA_IMM)
             op_b = ex_params.imm << ex_params.shift;
         else if (ex_params.b_sel == SEL_REG) begin
-            op_b = ex_params.rb_data;
-
-            if (rb_sel == FW_SEL_MEM_WB)
-                op_b = rd_data_mem_wb;
-            else if (rb_sel == FW_SEL_EX_MEM)
-                op_b = rd_data_ex_mem;
+            op_b = rb_data;
         end
 
         if (ex_params.invert_b)
@@ -128,7 +132,7 @@ module ex_stage(
 
         mem_params.rd_addr  = ex_params.rd_addr;
         mem_params.mem_op   = ex_params.mem_op;
-        mem_params.mem_data = '0;
+        mem_params.mem_data = ex_params.mem_op == MEM_OP_STORE ? rb_data : '0;
 
         if (ex_params.branch) begin
             branch_req = !ex_params.cond_branch || (t_in ^ ex_params.invert_t);
