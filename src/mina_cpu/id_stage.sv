@@ -55,9 +55,9 @@ module id_stage(
         OPC_MEM   = 7'b100100x,
         OPC_LOAD  = 7'b1001000,
         OPC_STORE = 7'b1001001,
-        OPC_MOVH  = 7'b1111100,
-        OPC_ADR   = 7'b1111101,
-        OPC_BRA   = 7'b1111111
+        OPC_MOVH  = 7'b1110110,
+        OPC_ADR   = 7'b1110111,
+        OPC_BRA   = 7'b1111xxx
     } opcode_e;
 
     enum logic[9:0] {
@@ -101,11 +101,10 @@ module id_stage(
     assign secopc = id_params.ir[26:17];
 
     always_comb begin
-        // TODO: get source from RD for stores
         ex_params.ia_plus_4 = id_params.ia_plus_4;
         ex_params.ra_addr   = id_params.ir[16:12];
-        ex_params.rb_addr   = id_params.ir[31:27];
-        ex_params.rd_addr   = id_params.ir[11: 7];
+        ex_params.rb_addr   = (opcode == OPC_STORE) ? id_params.ir[11:7] : id_params.ir[31:27];
+        ex_params.rd_addr   = (opcode != OPC_STORE) ? id_params.ir[11:7] : '0;
 
         ex_params.imm   = {20'b0, id_params.ir[31:20]};
         ex_params.shift = opcode[6:1] == OPC_MEM[6:1] ? shift_t'(secopc[2:1]) : '0;
@@ -127,7 +126,7 @@ module id_stage(
                 ex_params.a_sel = SEL_REG;
                 ex_params.b_sel = SEL_REG;
             end
-            7'b111110x: begin
+            OPC_MOVH, OPC_ADR: begin
                 // U-type
                 // opcode[0] -> MOVH, opcode[1] -> ADR
                 ex_params.a_sel = opcode[0] ? SEL_IA_IMM : SEL_ZERO;
@@ -140,8 +139,8 @@ module id_stage(
                 ex_params.a_sel = SEL_IA_IMM;
                 ex_params.b_sel = SEL_IA_IMM;
 
-                // secopc[2] = 0 -> BRA, secopc[2] = 1 -> CALL
-                ex_params.rd_addr = secopc[2] ? 5'd31 : '0;
+                // opcode[0] = 0 -> BRA, opcode[0] = 1 -> CALL
+                ex_params.rd_addr = opcode[0] ? 5'd31 : '0;
 
                 ex_params.imm = {{5{id_params.ir[31]}}, id_params.ir[31:7], 2'b0};
             end
@@ -189,8 +188,8 @@ module id_stage(
             end
             OPC_BRA: begin
                 ex_params.branch      = '1;
-                ex_params.cond_branch = secopc[1];
-                ex_params.invert_t    = secopc[0];
+                ex_params.cond_branch = opcode[1];
+                ex_params.invert_t    = opcode[2];
             end
         endcase
     end
