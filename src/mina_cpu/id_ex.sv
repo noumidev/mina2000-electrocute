@@ -8,6 +8,8 @@
  */
 
 import types::SEL_ZERO;
+import types::ALU_OP_ADD;
+import types::T_OP_SET;
 import types::ex_params_t;
 
 module id_ex(
@@ -25,7 +27,7 @@ module id_ex(
         if (!rst_n) begin
             ex_params_out.ia_plus_4 <= '0;
             ex_params_out.a_sel     <= SEL_ZERO;
-            ex_params_out.a_sel     <= SEL_ZERO;
+            ex_params_out.b_sel     <= SEL_ZERO;
             ex_params_out.ra_addr   <= '0;
             ex_params_out.ra_data   <= '0;
             ex_params_out.rb_addr   <= '0;
@@ -33,6 +35,10 @@ module id_ex(
             ex_params_out.rd_addr   <= '0;
             ex_params_out.imm       <= '0;
             ex_params_out.shift     <= '0;
+            ex_params_out.alu_op    <= ALU_OP_ADD;
+            ex_params_out.invert_b  <= '0;
+            ex_params_out.t_op      <= T_OP_SET;
+            ex_params_out.invert_t  <= '0;
         end else begin
             ex_params_out <= ex_params_in;
         end
