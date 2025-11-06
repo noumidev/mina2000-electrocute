@@ -128,13 +128,18 @@ module mina(
     u32_t rd_data_ex_mem;
     u32_t rd_data_mem_wb;
 
+    logic t_ex;
+    logic t_ex_mem;
+
     ex_stage ex_stage0(
         .ex_params(ex_params_ex),
         .ra_sel(ra_sel),
         .rb_sel(rb_sel),
         .rd_data_ex_mem(rd_data_ex_mem),
+        .t_in(t_ex_mem),
         .rd_data_mem_wb(rd_data_mem_wb),
-        .mem_params(mem_params_ex)
+        .mem_params(mem_params_ex),
+        .t_out(t_ex)
     );
 
     // --- EX/MEM ---
@@ -142,7 +147,9 @@ module mina(
         .clk(clk),
         .rst_n(rst_n),
         .mem_params_in(mem_params_ex),
-        .mem_params_out(mem_params_mem)
+        .t_in(t_ex),
+        .mem_params_out(mem_params_mem),
+        .t_out(t_ex_mem)
     );
 
     assign rd_addr_ex_mem = mem_params_mem.rd_addr;
