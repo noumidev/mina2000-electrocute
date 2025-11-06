@@ -22,7 +22,7 @@ module top(
     localparam CLOCK_FREQUENCY = 27_000_000;
 
     // Debug
-    u32_t wb_out;
+    u8_t dmem_leds;
 
     // DMEM signals
     u32_t   dmem_addr;
@@ -40,7 +40,8 @@ module top(
         .addr(dmem_addr),
         .wrdata(dmem_wrdata),
         .wrstb(dmem_wrstb),
-        .rddata(dmem_rddata)
+        .rddata(dmem_rddata),
+        .leds(dmem_leds)
     );
 
     imem imem0(
@@ -57,8 +58,7 @@ module top(
         .dmem_wrstb(dmem_wrstb),
         .dmem_rddata(dmem_rddata),
         .imem_addr(imem_addr),
-        .imem_data(imem_data),
-        .wb_out(wb_out)
+        .imem_data(imem_data)
     );
 
     // Debug
@@ -69,7 +69,7 @@ module top(
             counter <= CLOCK_FREQUENCY / 2;
         else begin
             if (counter == 0) begin
-                leds    <= ~wb_out[3:0];
+                leds    <= ~dmem_leds[3:0];
                 counter <= CLOCK_FREQUENCY / 2;
             end else
                 counter <= counter - 32'b1;

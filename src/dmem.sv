@@ -18,7 +18,9 @@ module dmem(
     input  u32_t   addr,
     input  u32_t   wrdata,
     input  wrstb_t wrstb,
-    output u32_t   rddata
+    output u32_t   rddata,
+
+    output u8_t leds
 );
 
     localparam SIZE = 1024;
@@ -53,5 +55,7 @@ module dmem(
         else
             rddata = mem[{addr[9:2], 2'b00}];
     end
+
+    assign leds = mem[0];
 
 endmodule
