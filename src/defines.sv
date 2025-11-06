@@ -32,8 +32,18 @@ package types;
         ALU_OP_SUB = 4'b0001,
         ALU_OP_AND = 4'b0100,
         ALU_OP_OR  = 4'b0101,
-        ALU_OP_XOR = 4'b0110
+        ALU_OP_XOR = 4'b0110,
+        ALU_OP_CEQ = 4'b1000,
+        ALU_OP_CHS = 4'b1001,
+        ALU_OP_CGE = 4'b1010
     } alu_op_e;
+
+    typedef enum logic[1:0] {
+        T_OP_AND = 2'b00,
+        T_OP_OR  = 2'b01,
+        T_OP_XOR = 2'b10,
+        T_OP_SET = 2'b11
+    } t_op_e;
 
     // Memory operations
     typedef enum logic[1:0] {
@@ -66,6 +76,8 @@ package types;
 
         alu_op_e alu_op;
         logic    invert_b;
+        t_op_e   t_op;
+        logic    invert_t;
     } ex_params_t;
 
     typedef struct packed {
