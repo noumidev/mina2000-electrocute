@@ -28,9 +28,7 @@ module mina(
 
     // IMEM interface
     output u32_t imem_addr,
-    input  u32_t imem_data,
-
-    output u32_t wb_out
+    input  u32_t imem_data
 );
 
     localparam INITIAL_IA = 32'b0;
@@ -205,7 +203,5 @@ module mina(
     // --- Write-back ---
     assign rd_addr_wb = wb_params_wb.rd_addr;
     assign rd_data_wb = wb_params_wb.rd_data;
-
-    assign wb_out = wb_params_wb.rd_data;
 
 endmodule
