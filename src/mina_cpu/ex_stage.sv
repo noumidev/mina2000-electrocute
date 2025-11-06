@@ -18,6 +18,13 @@ import types::ALU_OP_SUB;
 import types::ALU_OP_AND;
 import types::ALU_OP_OR;
 import types::ALU_OP_XOR;
+import types::ALU_OP_CEQ;
+import types::ALU_OP_CHS;
+import types::ALU_OP_CGE;
+import types::T_OP_AND;
+import types::T_OP_OR;
+import types::T_OP_XOR;
+import types::T_OP_SET;
 import types::MEM_OP_NONE;
 import types::ex_params_t;
 import types::mem_params_t;
@@ -32,12 +39,14 @@ module ex_stage(
 
     // From EX/MEM
     input u32_t rd_data_ex_mem,
+    input logic t_in,
 
     // From MEM/WB
     input u32_t rd_data_mem_wb,
 
     // To EX/MEM
-    output mem_params_t mem_params
+    output mem_params_t mem_params,
+    output logic        t_out
 );
 
     u32_t op_a;
@@ -45,11 +54,15 @@ module ex_stage(
 
     u32_t result;
 
+    logic t_cmp;
+
     always_comb begin
         op_a = '0;
         op_b = '0;
 
         result = '0;
+        t_cmp  = '0;
+        t_out  = t_in;
     
         // Select operand A
         if (ex_params.a_sel == SEL_IA_IMM)
@@ -65,7 +78,7 @@ module ex_stage(
 
         // Select operand B
         if (ex_params.b_sel == SEL_IA_IMM)
-            op_b = ex_params.ia_plus_4;
+            op_b = ex_params.imm << ex_params.shift;
         else if (ex_params.b_sel == SEL_REG) begin
             op_b = ex_params.rb_data;
 
@@ -84,6 +97,24 @@ module ex_stage(
             ALU_OP_AND: result = op_a & op_b;
             ALU_OP_OR:  result = op_a | op_b;
             ALU_OP_XOR: result = op_a ^ op_b;
+            ALU_OP_CEQ, ALU_OP_CGE, ALU_OP_CHS: begin
+                if (ex_params.alu_op == ALU_OP_CEQ)
+                    t_cmp = op_a == op_b;
+                else if (ex_params.alu_op == ALU_OP_CHS)
+                    t_cmp = op_a >= op_b;
+                else
+                    t_cmp = $signed(op_a) >= $signed(op_b);
+                
+                if (ex_params.invert_t)
+                    t_cmp = !t_cmp;
+                
+                unique case(ex_params.t_op) inside
+                    T_OP_AND: t_out = t_cmp & t_in;
+                    T_OP_OR:  t_out = t_cmp | t_in;
+                    T_OP_XOR: t_out = t_cmp ^ t_in;
+                    T_OP_SET: t_out = t_cmp;
+                endcase
+            end
         endcase
 
         mem_params.rd_addr = ex_params.rd_addr;
