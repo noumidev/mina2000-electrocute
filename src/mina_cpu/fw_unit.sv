@@ -35,18 +35,18 @@ module fw_unit(
         rb_sel = FW_SEL_ID_EX;
 
         // If any of the source registers in ID/EX reference a register that hasn't made it to WB yet,
-        // we forward the values from EX/MEM or MEM/WB to it. The value from MEM/WB is more recent,
+        // we forward the values from EX/MEM or MEM/WB to it. The value in EX/MEM is more recent,
         // so we check it first
 
-        if (rd_addr_mem_wb == ra_addr_id_ex)
-            ra_sel = FW_SEL_MEM_WB;
-        else if (rd_addr_ex_mem == ra_addr_id_ex)
+        if (rd_addr_ex_mem == ra_addr_id_ex)
             ra_sel = FW_SEL_EX_MEM;
+        else if (rd_addr_mem_wb == ra_addr_id_ex)
+            ra_sel = FW_SEL_MEM_WB;
 
-        if (rd_addr_mem_wb == rb_addr_id_ex)
-            rb_sel = FW_SEL_MEM_WB;
-        else if (rd_addr_ex_mem == rb_addr_id_ex)
+        if (rd_addr_ex_mem == rb_addr_id_ex)
             rb_sel = FW_SEL_EX_MEM;
+        else if (rd_addr_mem_wb == rb_addr_id_ex)
+            rb_sel = FW_SEL_MEM_WB;
     end
 
 endmodule
