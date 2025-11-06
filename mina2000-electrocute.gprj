@@ -11,6 +11,7 @@
         <File path="src/mina_cpu/ex_mem.sv" type="file.verilog" enable="1"/>
         <File path="src/mina_cpu/ex_stage.sv" type="file.verilog" enable="1"/>
         <File path="src/mina_cpu/fw_unit.sv" type="file.verilog" enable="1"/>
+        <File path="src/mina_cpu/hazard_unit.sv" type="file.verilog" enable="1"/>
         <File path="src/mina_cpu/id_ex.sv" type="file.verilog" enable="1"/>
         <File path="src/mina_cpu/id_stage.sv" type="file.verilog" enable="1"/>
         <File path="src/mina_cpu/if_id.sv" type="file.verilog" enable="1"/>

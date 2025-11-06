@@ -35,11 +35,15 @@ module mina(
 
     localparam INITIAL_IA = 32'b0;
 
+    logic load_hazard;
+
     // --- Instruction address register ---
     u32_t ia;
     u32_t ia_plus_4;
     logic branch_req;
     u32_t branch_ia;
+
+    logic ia_stall;
 
     always_ff @(posedge clk) begin
         if (!rst_n)
@@ -47,7 +51,7 @@ module mina(
         else begin
             if (branch_req)
                 ia <= branch_ia;
-            else
+            else if (!ia_stall)
                 ia <= ia_plus_4;
         end
     end
@@ -55,6 +59,8 @@ module mina(
     always_comb begin
         ia_plus_4 = ia + 32'd4;
     end
+
+    assign ia_stall = load_hazard;
 
     // --- Instruction fetch ---
     id_params_t id_params_if;
@@ -67,14 +73,18 @@ module mina(
 
     // --- IF/ID ---
     logic if_id_valid;
+    logic if_id_stall;
 
     if_id if_id0(
         .clk(clk),
         .rst_n(rst_n),
         .id_params_in(id_params_if),
         .id_params_out(id_params_id),
-        .valid(if_id_valid)
+        .valid(if_id_valid),
+        .stall(if_id_stall)
     );
+
+    assign if_id_stall = load_hazard;
 
     // --- Instruction decode ---
     ex_params_t ex_params_id;
@@ -105,7 +115,7 @@ module mina(
 
     // Flush IF and ID upon branches
     assign if_id_valid = !branch_req;
-    assign id_ex_valid = !branch_req;
+    assign id_ex_valid = !branch_req && !load_hazard;
 
     // --- Forwarding unit ---
     regaddr_t rd_addr_ex_mem;
@@ -121,6 +131,15 @@ module mina(
         .rd_addr_mem_wb(rd_addr_mem_wb),
         .ra_sel(ra_sel),
         .rb_sel(rb_sel)
+    );
+
+    // --- Hazard detection unit ---
+    hazard_unit hazard_unit0(
+        .mem_op(ex_params_id.mem_op),
+        .ra_addr_id(ex_params_id.ra_addr),
+        .rb_addr_id(ex_params_id.rb_addr),
+        .rd_addr_id_ex(ex_params_ex.rd_addr),
+        .load_hazard(load_hazard)
     );
 
     // --- Execute stage ---
