@@ -9,6 +9,7 @@
 
 import types::u32_t;
 import types::regaddr_t;
+import types::shift_t;
 import types::sel_e;
 import types::SEL_ZERO;
 import types::SEL_IA_IMM;
@@ -18,6 +19,10 @@ import types::ALU_OP_SUB;
 import types::ALU_OP_AND;
 import types::ALU_OP_OR;
 import types::ALU_OP_XOR;
+import types::ALU_OP_CEQ;
+import types::ALU_OP_CHS;
+import types::ALU_OP_CGE;
+import types::t_op_e;
 import types::id_params_t;
 import types::ex_params_t;
 
@@ -49,6 +54,8 @@ module id_stage(
     enum logic[6:0] {
         OPC_ARITH = 7'bx000000,
         OPC_LOGIC = 7'bx000001,
+        OPC_CMP   = 7'bx0001xx,
+        OPC_MEM   = 7'b100100x,
         OPC_MOVH  = 7'b1111100,
         OPC_ADR   = 7'b1111101,
         OPC_BRA   = 7'b1111110,
@@ -65,6 +72,18 @@ module id_stage(
         LOGIC_OR   = 10'b01x,
         LOGIC_XOR  = 10'b10x
     } logic_e;
+
+    enum logic[9:0] {
+        CMP_EQ = 10'b00x,
+        CMP_HS = 10'b01x,
+        CMP_GE = 10'b10x
+    } cmp_e;
+
+    enum logic[9:0] {
+        MEM_B = 10'b00x,
+        MEM_H = 10'b01x,
+        MEM_W = 10'b10x
+    } mem_e;
 
     regfile regfile0(
         .clk(clk),
@@ -90,8 +109,8 @@ module id_stage(
         ex_params.rb_addr   = id_params.ir[31:27];
         ex_params.rd_addr   = id_params.ir[11: 7];
 
-        ex_params.imm   = '0;
-        ex_params.shift = '0;
+        ex_params.imm   = {20'b0, id_params.ir[31:20]};
+        ex_params.shift = opcode[6:1] == OPC_MEM[6:1] ? shift_t'(secopc[2:1]) : '0;
 
         branch_req = '0;
         branch_ia  = '0;
@@ -128,15 +147,16 @@ module id_stage(
                 ex_params.a_sel = SEL_REG;
                 ex_params.b_sel = SEL_IA_IMM;
 
-                // TODO: sign extension for some opcodes
-                ex_params.imm = {20'b0, id_params.ir[31:20]};
-
-                // TODO: shifts for loadstores
+                // Sign extension for compares and loadstores
+                if ((opcode[5:2] == OPC_CMP[5:2]) || (opcode[6:1] == OPC_MEM[6:1]))
+                    ex_params.imm[31:12] = {20{id_params.ir[31]}};
             end
         endcase
 
         ex_params.alu_op   = ALU_OP_ADD;
         ex_params.invert_b = '0;
+        ex_params.t_op     = T_OP_SET;
+        ex_params.invert_t = '0;
 
         // Decode operation
         unique0 case(opcode) inside
@@ -153,6 +173,16 @@ module id_stage(
                 endcase
 
                 ex_params.invert_b = opcode[0];
+            end
+            OPC_CMP: begin
+                unique0 case(secopc) inside
+                    CMP_EQ: ex_params.alu_op = ALU_OP_CEQ;
+                    CMP_HS: ex_params.alu_op = ALU_OP_CHS;
+                    CMP_GE: ex_params.alu_op = ALU_OP_CGE;
+                endcase
+
+                ex_params.t_op     = t_op_e'(opcode[1:0]);
+                ex_params.invert_t = secopc[0];
             end
         endcase
     end
