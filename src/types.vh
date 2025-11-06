@@ -1,8 +1,21 @@
+/*
+ * MINA2000 "ElectroCute" is the MINAv2 reference implementation.
+ * Copyright (C) 2025  noumidev
+ */
+
+/*
+ * defines.vh - Various definitions
+ */
+
+`ifndef TYPES_VH_
+`define TYPES_VH_
+
 package types;
 
     // Common
     typedef logic[ 7:0] u8_t;
     typedef logic[31:0] u32_t;
+    typedef logic[ 3:0] led_t;
 
     // Registers
     typedef logic[4:0] regaddr_t;
@@ -99,3 +112,5 @@ package types;
     } wb_params_t;
 
 endpackage
+
+`endif

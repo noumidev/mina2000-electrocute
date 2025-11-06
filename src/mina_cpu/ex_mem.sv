@@ -7,6 +7,8 @@
  * mina_cpu/ex_mem.sv - Intermediary EX/MEM register
  */
 
+`include "types.vh"
+
 import types::MEM_OP_NONE;
 import types::mem_params_t;
 

@@ -7,6 +7,8 @@
  * mina_cpu/id_stage.sv - Instruction Decode stage
  */
 
+`include "types.vh"
+
 import types::u32_t;
 import types::regaddr_t;
 import types::shift_t;

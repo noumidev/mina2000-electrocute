@@ -7,6 +7,8 @@
  * mina_cpu/regfile.sv - Register file
  */
 
+`include "types.vh"
+
 import types::u32_t;
 import types::regaddr_t;
 

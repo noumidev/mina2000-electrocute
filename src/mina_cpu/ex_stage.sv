@@ -7,6 +7,8 @@
  * mina_cpu/ex_stage.sv - Execute/address calculation stage
  */
 
+`include "types.vh"
+
 import types::u32_t;
 import types::SEL_IA_IMM;
 import types::SEL_REG;

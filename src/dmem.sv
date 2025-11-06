@@ -7,8 +7,11 @@
  * dmem.sv - Data memory
  */
 
+`include "types.vh"
+
 import types::u8_t;
 import types::u32_t;
+import types::led_t;
 import types::wrstb_t;
 
 module dmem(
@@ -20,7 +23,7 @@ module dmem(
     input  wrstb_t wrstb,
     output u32_t   rddata,
 
-    output u8_t leds
+    output led_t leds
 );
 
     localparam SIZE = 1024;
@@ -53,9 +56,9 @@ module dmem(
         if (!rst_n)
             rddata = '0;
         else
-            rddata = mem[{addr[9:2], 2'b00}];
+            rddata = {mem[{addr[9:2], 2'b11}], mem[{addr[9:2], 2'b01}], mem[{addr[9:2], 2'b01}], mem[{addr[9:2], 2'b00}]};
     end
 
-    assign leds = mem[0];
+    assign leds = mem[0][3:0];
 
 endmodule

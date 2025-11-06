@@ -7,10 +7,12 @@
  * top.sv - Top level module
  */
 
-import types::u32_t;
-import types::wrstb_t;
+`include "types.vh"
 
-typedef logic[3:0] led_t;
+import types::u8_t;
+import types::u32_t;
+import types::led_t;
+import types::wrstb_t;
 
 module top(
     input logic clk,
@@ -22,7 +24,7 @@ module top(
     localparam CLOCK_FREQUENCY = 27_000_000;
 
     // Debug
-    u8_t dmem_leds;
+    led_t dmem_leds;
 
     // DMEM signals
     u32_t   dmem_addr;
@@ -69,7 +71,7 @@ module top(
             counter <= CLOCK_FREQUENCY / 2;
         else begin
             if (counter == 0) begin
-                leds    <= ~dmem_leds[3:0];
+                leds    <= ~dmem_leds;
                 counter <= CLOCK_FREQUENCY / 2;
             end else
                 counter <= counter - 32'b1;

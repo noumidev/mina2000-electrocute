@@ -7,6 +7,8 @@
  * mina_cpu/mem_wb.sv - Intermediary MEM/WB register
  */
 
+`include "types.vh"
+
 import types::wb_params_t;
 
 module mem_wb(

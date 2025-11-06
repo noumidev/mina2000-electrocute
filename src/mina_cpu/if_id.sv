@@ -7,6 +7,8 @@
  * mina_cpu/if_id.sv - Intermediary IF/ID register
  */
 
+`include "types.vh"
+
 import types::id_params_t;
 
 module if_id(

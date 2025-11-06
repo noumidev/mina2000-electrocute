@@ -7,6 +7,8 @@
  * imem.sv - Instruction memory
  */
 
+`include "types.vh"
+
 import types::u32_t;
 
 module imem(

@@ -7,6 +7,8 @@
  * mina_cpu/mem_stage.sv - Memory stage
  */
 
+`include "types.vh"
+
 import types::u32_t;
 import types::wrstb_t;
 import types::mem_params_t;

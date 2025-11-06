@@ -7,6 +7,8 @@
  * mina_cpu/hazard_unit.sv - Hazard detection unit
  */
 
+`include "types.vh"
+
 import types::regaddr_t;
 import types::mem_op_e;
 import types::MEM_OP_LOAD;

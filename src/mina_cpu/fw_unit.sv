@@ -7,6 +7,8 @@
  * mina_cpu/fw_unit.sv - Forwarding unit
  */
 
+`include "types.vh"
+
 import types::u32_t;
 import types::regaddr_t;
 import types::fw_sel_e;

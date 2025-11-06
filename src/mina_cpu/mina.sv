@@ -7,6 +7,8 @@
  * mina_cpu/mina.sv - CPU glue logic
  */
 
+`include "types.vh"
+
 import types::u32_t;
 import types::regaddr_t;
 import types::wrstb_t;

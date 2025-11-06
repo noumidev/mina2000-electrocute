@@ -7,6 +7,8 @@
  * mina_cpu/id_ex.sv - Intermediary ID/EX register
  */
 
+`include "types.vh"
+
 import types::SEL_ZERO;
 import types::ALU_OP_ADD;
 import types::T_OP_SET;
