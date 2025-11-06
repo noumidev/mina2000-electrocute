@@ -19,7 +19,7 @@ module if_id(
     // To ID
     output id_params_t id_params_out,
 
-    // From ID
+    // From EX
     input logic valid
 );
 
