@@ -78,6 +78,9 @@ package types;
         logic    invert_b;
         t_op_e   t_op;
         logic    invert_t;
+
+        logic branch;
+        logic cond_branch;
     } ex_params_t;
 
     typedef struct packed {
