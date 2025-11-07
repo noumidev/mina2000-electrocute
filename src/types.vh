@@ -68,11 +68,6 @@ package types;
     // Pipeline
     typedef struct packed {
         u32_t ia_plus_4;
-        u32_t ir;
-    } id_params_t;
-
-    typedef struct packed {
-        u32_t ia_plus_4;
 
         sel_e a_sel; // 0 -> 0, 1 ->  IA, 2 -> RA
         sel_e b_sel; // 0 -> 0, 1 -> IMM, 2 -> RB

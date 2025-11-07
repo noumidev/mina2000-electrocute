@@ -28,7 +28,6 @@ import types::t_op_e;
 import types::MEM_OP_NONE;
 import types::MEM_OP_LOAD;
 import types::MEM_OP_STORE;
-import types::id_params_t;
 import types::ex_params_t;
 
 module id_stage(
@@ -36,15 +35,19 @@ module id_stage(
     input logic clk,
     input logic rst_n,
 
-    // From IF/ID
-    input id_params_t id_params,
+    // From IF/ID /IMEM
+    input u32_t ia_plus_4,
+    input u32_t ir,
 
     // From WB
     input regaddr_t rd_addr,
     input u32_t     rd_data,
 
     // To ID/EX
-    output ex_params_t ex_params
+    output ex_params_t ex_params,
+
+    // From hazard unit
+    input logic valid
 );
 
     typedef logic[6:0] opcode_t;
@@ -96,19 +99,26 @@ module id_stage(
         .rd_data(rd_data)
     );
 
+    u32_t ir_or_0;
+
     opcode_t opcode;
     secopc_t secopc;
 
-    assign opcode = id_params.ir[ 6: 0];
-    assign secopc = id_params.ir[19:17];
-
     always_comb begin
-        ex_params.ia_plus_4 = id_params.ia_plus_4;
-        ex_params.ra_addr   = id_params.ir[16:12];
-        ex_params.rb_addr   = (opcode == OPC_STORE) ? id_params.ir[11:7] : id_params.ir[31:27];
-        ex_params.rd_addr   = (opcode != OPC_STORE) ? id_params.ir[11:7] : '0;
+        if (valid)
+            ir_or_0 = ir;
+        else
+            ir_or_0 = '0;
 
-        ex_params.imm   = {20'b0, id_params.ir[31:20]};
+        opcode = ir_or_0[ 6: 0];
+        secopc = ir_or_0[19:17];
+
+        ex_params.ia_plus_4 = ia_plus_4;
+        ex_params.ra_addr   = ir_or_0[16:12];
+        ex_params.rb_addr   = (opcode == OPC_STORE) ? ir_or_0[11:7] : ir_or_0[31:27];
+        ex_params.rd_addr   = (opcode != OPC_STORE) ? ir_or_0[11:7] : '0;
+
+        ex_params.imm   = {20'b0, ir_or_0[31:20]};
         ex_params.shift = opcode[6:1] == OPC_MEM[6:1] ? shift_t'(secopc[2:1]) : '0;
         
         ex_params.branch      = '0;
@@ -134,7 +144,7 @@ module id_stage(
                 ex_params.a_sel = opcode[0] ? SEL_IA_IMM : SEL_ZERO;
                 ex_params.b_sel = SEL_IA_IMM;
 
-                ex_params.imm = {id_params.ir[31:12], 12'b0};
+                ex_params.imm = {ir_or_0[31:12], 12'b0};
             end
             OPC_BRA: begin
                 // D-type
@@ -144,7 +154,7 @@ module id_stage(
                 // opcode[0] = 0 -> BRA, opcode[0] = 1 -> CALL
                 ex_params.rd_addr = opcode[0] ? 5'd31 : '0;
 
-                ex_params.imm = {{5{id_params.ir[31]}}, id_params.ir[31:7], 2'b0};
+                ex_params.imm = {{5{ir_or_0[31]}}, ir_or_0[31:7], 2'b0};
             end
             default: begin
                 // I-type
@@ -153,7 +163,7 @@ module id_stage(
 
                 // Sign extension for compares and loadstores
                 if ((opcode[5:2] == OPC_CMP[5:2]) || (opcode[6:1] == OPC_MEM[6:1]))
-                    ex_params.imm[31:12] = {20{id_params.ir[31]}};
+                    ex_params.imm[31:12] = {20{ir_or_0[31]}};
             end
         endcase
 

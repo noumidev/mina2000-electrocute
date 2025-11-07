@@ -9,17 +9,17 @@
 
 `include "types.vh"
 
-import types::id_params_t;
+import types::u32_t;
 
 module if_id(
     input logic clk,
     input logic rst_n,
 
     // From IF
-    input id_params_t id_params_in,
+    input u32_t ia_plus_4_in,
 
     // To ID
-    output id_params_t id_params_out,
+    output u32_t ia_plus_4_out,
 
     // From EX
     input logic valid,
@@ -30,10 +30,9 @@ module if_id(
 
     always_ff @(posedge clk) begin
         if (!rst_n || !valid) begin
-            id_params_out.ia_plus_4 <= '0;
-            id_params_out.ir        <= '0;
+            ia_plus_4_out <= '0;
         end else if (!stall)
-            id_params_out <= id_params_in;
+            ia_plus_4_out <= ia_plus_4_in;
     end
 
 endmodule
