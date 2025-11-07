@@ -47,6 +47,7 @@ module top(
     );
 
     imem imem0(
+        .clk(clk),
         .rst_n(rst_n),
         .addr(imem_addr),
         .data(imem_data)
