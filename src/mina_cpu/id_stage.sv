@@ -48,41 +48,41 @@ module id_stage(
 );
 
     typedef logic[6:0] opcode_t;
-    typedef logic[9:0] secopc_t;
+    typedef logic[2:0] secopc_t;
 
-    enum logic[6:0] {
-        OPC_ARITH = 7'bx000000,
-        OPC_LOGIC = 7'bx000001,
-        OPC_CMP   = 7'bx0001xx,
-        OPC_MEM   = 7'b100100x,
+    typedef enum logic[6:0] {
+        OPC_ARITH = 7'b?000000,
+        OPC_LOGIC = 7'b?000001,
+        OPC_CMP   = 7'b?0001??,
+        OPC_MEM   = 7'b100100?,
         OPC_LOAD  = 7'b1001000,
         OPC_STORE = 7'b1001001,
         OPC_MOVH  = 7'b1110110,
         OPC_ADR   = 7'b1110111,
-        OPC_BRA   = 7'b1111xxx
+        OPC_BRA   = 7'b1111???
     } opcode_e;
 
-    enum logic[9:0] {
-        ARITH_ADD = 10'b000,
-        ARITH_SUB = 10'b100
+    typedef enum logic[2:0] {
+        ARITH_ADD = 3'b000,
+        ARITH_SUB = 3'b100
     } arith_e;
 
-    enum logic[9:0] {
-        LOGIC_AND  = 10'b00x,
-        LOGIC_OR   = 10'b01x,
-        LOGIC_XOR  = 10'b10x
+    typedef enum logic[2:0] {
+        LOGIC_AND  = 3'b00?,
+        LOGIC_OR   = 3'b01?,
+        LOGIC_XOR  = 3'b10?
     } logic_e;
 
-    enum logic[9:0] {
-        CMP_EQ = 10'b00x,
-        CMP_HS = 10'b01x,
-        CMP_GE = 10'b10x
+    typedef enum logic[2:0] {
+        CMP_EQ = 3'b00?,
+        CMP_HS = 3'b01?,
+        CMP_GE = 3'b10?
     } cmp_e;
 
-    enum logic[9:0] {
-        MEM_B = 10'b00x,
-        MEM_H = 10'b01x,
-        MEM_W = 10'b10x
+    typedef enum logic[2:0] {
+        MEM_B = 3'b00?,
+        MEM_H = 3'b01?,
+        MEM_W = 3'b10?
     } mem_e;
 
     regfile regfile0(
@@ -100,7 +100,7 @@ module id_stage(
     secopc_t secopc;
 
     assign opcode = id_params.ir[ 6: 0];
-    assign secopc = id_params.ir[26:17];
+    assign secopc = id_params.ir[19:17];
 
     always_comb begin
         ex_params.ia_plus_4 = id_params.ia_plus_4;
@@ -123,7 +123,7 @@ module id_stage(
 
         // Decode operands
         unique case(opcode) inside
-            7'b0xxxxxx: begin
+            7'b0??????: begin
                 // R-type
                 ex_params.a_sel = SEL_REG;
                 ex_params.b_sel = SEL_REG;
@@ -167,6 +167,7 @@ module id_stage(
             OPC_ARITH: begin
                 unique0 case(secopc) inside
                     ARITH_SUB: ex_params.alu_op = ALU_OP_SUB;
+                    default:   begin end
                 endcase
             end
             OPC_LOGIC: begin
@@ -174,15 +175,17 @@ module id_stage(
                     LOGIC_AND: ex_params.alu_op = ALU_OP_AND;
                     LOGIC_OR:  ex_params.alu_op = ALU_OP_OR;
                     LOGIC_XOR: ex_params.alu_op = ALU_OP_XOR;
+                    default:   begin end
                 endcase
 
-                ex_params.invert_b = opcode[0];
+                ex_params.invert_b = secopc[0];
             end
             OPC_CMP: begin
                 unique0 case(secopc) inside
-                    CMP_EQ: ex_params.alu_op = ALU_OP_CEQ;
-                    CMP_HS: ex_params.alu_op = ALU_OP_CHS;
-                    CMP_GE: ex_params.alu_op = ALU_OP_CGE;
+                    CMP_EQ:  ex_params.alu_op = ALU_OP_CEQ;
+                    CMP_HS:  ex_params.alu_op = ALU_OP_CHS;
+                    CMP_GE:  ex_params.alu_op = ALU_OP_CGE;
+                    default: begin end
                 endcase
 
                 ex_params.t_op     = t_op_e'(opcode[1:0]);
@@ -193,6 +196,7 @@ module id_stage(
                 ex_params.cond_branch = opcode[1];
                 ex_params.invert_t    = opcode[2];
             end
+            default: begin end
         endcase
     end
 
