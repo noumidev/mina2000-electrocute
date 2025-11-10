@@ -12,7 +12,7 @@
 import types::u32_t;
 
 module imem(
-    input logic rst_n,
+    input logic clk,
 
     input  u32_t addr,
     output u32_t data
@@ -30,11 +30,8 @@ module imem(
     end
 
     // Reads
-    always_comb begin
-        if (!rst_n)
-            data = '0;
-        else
-            data = mem[addr[9:2]];
+    always @(posedge clk) begin
+        data <= mem[addr[9:2]];
     end
 
 endmodule

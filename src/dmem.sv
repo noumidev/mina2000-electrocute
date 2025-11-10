@@ -35,7 +35,7 @@ module dmem(
     // Writes
     always_ff @(posedge clk) begin
         if (!rst_n) begin
-            // Do nothing
+            rddata <= '0;
         end else begin
             if (wrstb[0])
                 mem[{addr[9:2], 2'b00}] <= wrdata[7:0];
@@ -48,17 +48,11 @@ module dmem(
 
             if (wrstb[3])
                 mem[{addr[9:2], 2'b11}] <= wrdata[31:24];
+
+            rddata <= {mem[{addr[9:2], 2'b11}], mem[{addr[9:2], 2'b01}], mem[{addr[9:2], 2'b01}], mem[{addr[9:2], 2'b00}]};
+            
+            leds <= mem[0][3:0];
         end
     end
-
-    // Reads
-    always_comb begin
-        if (!rst_n)
-            rddata = '0;
-        else
-            rddata = {mem[{addr[9:2], 2'b11}], mem[{addr[9:2], 2'b01}], mem[{addr[9:2], 2'b01}], mem[{addr[9:2], 2'b00}]};
-    end
-
-    assign leds = mem[0][3:0];
 
 endmodule
