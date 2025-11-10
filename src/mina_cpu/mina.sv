@@ -172,6 +172,9 @@ module mina(
         .mem_params_in(mem_params_ex),
         .t_in(t_ex),
         .mem_params_out(mem_params_mem),
+        .dmem_addr(dmem_addr),
+        .dmem_wrdata(dmem_wrdata),
+        .dmem_wrstb(dmem_wrstb),
         .t_out(t_ex_mem)
     );
 
@@ -184,10 +187,6 @@ module mina(
 
     mem_stage mem_stage0(
         .mem_params(mem_params_mem),
-        .dmem_addr(dmem_addr),
-        .dmem_wrdata(dmem_wrdata),
-        .dmem_wrstb(dmem_wrstb),
-        .dmem_rddata(dmem_rddata),
         .wb_params(wb_params_mem)
     );
 
@@ -199,11 +198,20 @@ module mina(
         .wb_params_out(wb_params_wb)
     );
 
-    assign rd_addr_mem_wb = wb_params_wb.rd_addr;
-    assign rd_data_mem_wb = wb_params_wb.rd_data;
-
     // --- Write-back ---
-    assign rd_addr_wb = wb_params_wb.rd_addr;
-    assign rd_data_wb = wb_params_wb.rd_data;
+    always_comb begin
+        rd_addr_wb = wb_params_wb.rd_addr;
+
+        if (wb_params_wb.mem_op == MEM_OP_LOAD)
+            rd_data_wb = dmem_rddata;
+        else if (wb_params_wb.mem_op == MEM_OP_NONE)
+            rd_data_wb = wb_params_wb.rd_data;
+        else
+            rd_data_wb = '0;
+        
+        // To forwarding unit
+        rd_addr_mem_wb = rd_addr_wb;
+        rd_data_mem_wb = rd_data_wb;
+    end
 
 endmodule

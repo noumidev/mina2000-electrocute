@@ -9,6 +9,7 @@
 
 `include "types.vh"
 
+import types::MEM_OP_NONE;
 import types::wb_params_t;
 
 module mem_wb(
@@ -26,6 +27,7 @@ module mem_wb(
         if (!rst_n) begin
             wb_params_out.rd_addr <= '0;
             wb_params_out.rd_data <= '0;
+            wb_params_out.mem_op  <= MEM_OP_NONE;
         end else begin
             wb_params_out <= wb_params_in;
         end
