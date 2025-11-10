@@ -109,6 +109,7 @@ package types;
     typedef struct packed {
         regaddr_t rd_addr;
         u32_t     rd_data;
+        mem_op_e  mem_op; 
     } wb_params_t;
 
 endpackage
